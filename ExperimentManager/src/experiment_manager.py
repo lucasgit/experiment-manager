@@ -67,15 +67,12 @@ class Experiment:
                                             logFile=logFile, parameter=parameter[i] ) )
 
     def runBashJobs( self, jobsPerProcess=1 ):
-        print 'job indices: ' + str( range( 0, len( self.__jobList ), jobsPerProcess ) )
         for i in range( 0, len( self.__jobList ), jobsPerProcess ):
             jobNames = []
             jobCmds = ''
-#            print 'grp indices: ' + str( range( i, min( i + jobsPerProcess, len( self.__jobList ) ) ) )
             for j in range( i, min( i + jobsPerProcess, len( self.__jobList ) ) ):
                 jobNames.append( self.__jobList[j].getJobName() )
                 jobCmds += ' '.join( self.__jobList[j].bashCmd( withLogRedirect=True ) ) + ';'
-#            jobCmds += '\''
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
             subprocess.Popen( ['bash', '-c', jobCmds], shell=False )
             print 'done'
