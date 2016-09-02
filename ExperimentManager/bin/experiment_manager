@@ -90,6 +90,8 @@ class Experiment:
             jobCmds = 'bash -c "' + jobCmds[:-1] + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
+            print jobNames
+
             logFile = logDir + ( '/pbs_job_%s_%04d.out' % jobNames[0], jobId )
             errFile = logDir + ( '/pbs_job_%s_%04d.err' % jobNames[0], jobId )
             nowBit = 'y' if runNow else 'n'
