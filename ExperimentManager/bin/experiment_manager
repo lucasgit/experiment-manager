@@ -90,8 +90,8 @@ class Experiment:
             jobCmds = 'bash -c "' + jobCmds[:-1] + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
-            logFile = logDir + ( '/pbs_job_%s_%04d.out' % self.__experimentName, jobId )
-            errFile = logDir + ( '/pbs_job_%s_%04d.err' % self.__experimentName, jobId )
+            logFile = logDir + ( '/pbs_job_%s_%04d.out' % self.jobList[0].getJobName(), jobId )
+            errFile = logDir + ( '/pbs_job_%s_%04d.err' % self.jobList[0].getJobName(), jobId )
             nowBit = 'y' if runNow else 'n'
 
             qsubCmd = ' '.join( ['qsub', '-N', ( '%s_%04d' % self.jobList[0].getJobName(), jobId ), '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
