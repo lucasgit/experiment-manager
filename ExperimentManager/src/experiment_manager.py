@@ -96,7 +96,7 @@ class Experiment:
             qsubCmd = ' '.join( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds] )
             print '\n\n' + qsubCmd + '\n'
 
-            subprocess.Popen( ['bash', '-c', jobCmds], shell=False )
+            subprocess.Popen( ['bash', '-c', '"' + jobCmds + ' "'], shell=False )
             jobId += 1
 
             print 'done'
