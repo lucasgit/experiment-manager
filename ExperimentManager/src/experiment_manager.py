@@ -23,7 +23,7 @@ class Job:
         self.__parameterDict = params['parameter']
 
     def bashCmd( self, withLogRedirect=False ):
-        cmd = ['python', self.__script]
+        cmd = ['/usr/bin/python', self.__script]
         for ( flag, value ) in self.__parameterDict.items():
             cmd += [flag, str( value )]
         cmd += ['-r', self.__resultFile]
@@ -89,8 +89,8 @@ class Experiment:
             jobCmds = '"' + jobCmds + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
-            logFile = logDir + ( '/job%04d.out' % jobId )
-            errFile = logDir + ( '/job%04d.err' % jobId )
+            logFile = logDir + ( '/pbs_job_%04d.out' % jobId )
+            errFile = logDir + ( '/pbs_job_%04d.err' % jobId )
             nowBit = 'y' if runNow else 'n'
 
             subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds], shell=False )
