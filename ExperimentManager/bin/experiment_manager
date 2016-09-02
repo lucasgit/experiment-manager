@@ -86,7 +86,7 @@ class Experiment:
             for j in range( i, min( i + jobsPerProcess, len( self.jobList ) ) ):
                 jobNames.append( self.jobList[j].getJobName() )
                 jobCmds += ' '.join( self.jobList[j].bashCmd( withLogRedirect=False ) ) + ';'
-            jobCmds = '"' + jobCmds + '"'
+            jobCmds = '"' + jobCmds[:-1] + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
             logFile = logDir + ( '/pbs_job_%04d.out' % jobId )
