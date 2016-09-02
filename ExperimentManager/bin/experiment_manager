@@ -23,7 +23,7 @@ class Job:
         self.__parameterDict = params['parameter']
 
     def bashCmd( self, withLogRedirect=False ):
-        cmd = ['python_launcher', self.__script]
+        cmd = ['/usr/bin/python', self.__script]
         for ( flag, value ) in self.__parameterDict.items():
             cmd += [flag, str( value )]
         cmd += ['-r', self.__resultFile]
@@ -96,7 +96,7 @@ class Experiment:
             qsubCmd = ' '.join( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
             print '\n\n' + qsubCmd + '\n'
 
-            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False )
+            subprocess.Popen( ['. ~/.bashrc', ';', 'qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False )
             jobId += 1
 
             print 'done'
