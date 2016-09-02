@@ -97,7 +97,7 @@ class Experiment:
             print '\n\n' + qsubCmd + '\n'
 
 #            subprocess.Popen( ['. ~/.bashrc'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            subprocess.Popen( ['. ~/.bashrc', ';', 'qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
             jobId += 1
 
             print 'done'
