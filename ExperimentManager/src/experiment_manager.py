@@ -96,7 +96,8 @@ class Experiment:
             qsubCmd = ' '.join( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
             print '\n\n' + qsubCmd + '\n'
 
-            subprocess.Popen( ['. ~/.bashrc', ';', 'qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False )
+            subprocess.Popen( ['. ~/.bashrc'], shell=False )
+#            subprocess.Popen( ['. ~/.bashrc', ';', 'qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False )
             jobId += 1
 
             print 'done'
