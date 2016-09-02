@@ -86,7 +86,7 @@ class Experiment:
             for j in range( i, min( i + jobsPerProcess, len( self.jobList ) ) ):
                 jobNames.append( self.jobList[j].getJobName() )
                 jobCmds += ' '.join( self.jobList[j].bashCmd( withLogRedirect=False ) ) + ';'
-            jobCmds = '"' + jobCmds[:-1] + '"'
+            jobCmds = 'bash -c "' + jobCmds[:-1] + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
             logFile = logDir + ( '/pbs_job_%04d.out' % jobId )
@@ -97,7 +97,7 @@ class Experiment:
             print '\n\n' + qsubCmd + '\n'
 
 #            subprocess.Popen( ['. ~/.bashrc'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            subprocess.Popen( ['-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, executable='qsub', cwd='.' )
+            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
             jobId += 1
 
             print 'done'
