@@ -85,7 +85,7 @@ class Experiment:
             jobCmds = ''
             for j in range( i, min( i + jobsPerProcess, len( self.jobList ) ) ):
                 jobNames.append( self.jobList[j].getJobName() )
-                jobCmds += ' '.join( self.jobList[j].bashCmd( withLogRedirect=True ) ) + ';'
+                jobCmds += ' '.join( self.jobList[j].bashCmd( withLogRedirect=False ) ) + ';'
             jobCmds = '"' + jobCmds + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
