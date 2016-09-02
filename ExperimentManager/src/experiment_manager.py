@@ -95,7 +95,7 @@ class Experiment:
 
             print '\n\n' + ' '.join( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds] ) + '\n'
 
-            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds], shell=False )
+            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds], shell=True )
             jobId += 1
 
             print 'done'
