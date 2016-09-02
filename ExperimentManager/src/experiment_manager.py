@@ -50,7 +50,7 @@ class Experiment:
             for p in params:
                 self.jobList.append( Job( fromDictionary=p ) )
         else:
-            experimentName = params['name']
+            self.__experimentName = params['name']
             script = params['script']
             resultFileDirectory = params['resultFileDirectory']
             logFileDirectory = params['logFileDirectiory']
@@ -61,7 +61,7 @@ class Experiment:
 
             self.jobList = []
             for i in range( len( parameter ) ):
-                jobName = experimentName + ( '_%04d' % i )
+                jobName = self.__experimentName + ( '_%04d' % i )
                 resultFile = resultFileDirectory + '/' + jobName + '.json'
                 logFile = logFileDirectory + '/' + jobName + '.out'
                 self.jobList.append( Job( jobName=jobName, script=script, resultFile=resultFile, \
@@ -89,15 +89,15 @@ class Experiment:
             jobCmds = 'bash -c "' + jobCmds[:-1] + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
-            logFile = logDir + ( '/pbs_job_%04d.out' % jobId )
-            errFile = logDir + ( '/pbs_job_%04d.err' % jobId )
+            logFile = logDir + ( '/pbs_job_%s_%04d.out' % self.__experimentName, jobId )
+            errFile = logDir + ( '/pbs_job_%s_%04d.err' % self.__experimentName, jobId )
             nowBit = 'y' if runNow else 'n'
 
-            qsubCmd = ' '.join( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
+            qsubCmd = ' '.join( ['qsub', '-N', ( '%s_%04d' % self.__experimentName, jobId ), '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
             print '\n\n' + qsubCmd + '\n'
 
 #            subprocess.Popen( ['. ~/.bashrc'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
+            subprocess.Popen( ['qsub', '-N', ( '%s_%04d' % self.__experimentName, jobId ), '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
             jobId += 1
 
             print 'done'
