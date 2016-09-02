@@ -93,9 +93,10 @@ class Experiment:
             errFile = logDir + ( '/pbs_job_%04d.err' % jobId )
             nowBit = 'y' if runNow else 'n'
 
-            print '\n\n' + ' '.join( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds] ) + '\n'
+            qsubCmd = "'" + ' '.join( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds] ) + "'"
+            print '\n\n' + qsubCmd + '\n'
 
-            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds] , shell=True )
+            subprocess.Popen( ['bash', '-c', qsubCmd] , shell=True )
             jobId += 1
 
             print 'done'
