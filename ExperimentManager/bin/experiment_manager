@@ -7,6 +7,7 @@ Created on Apr 24, 2016
 
 import subprocess
 import json
+import os
 from math import ceil
 
 class Job:
@@ -45,9 +46,9 @@ class Experiment:
     def __init__( self, **params ):
         if params.has_key( 'fromDictionary' ):
             params = params['fromDictionary']
-            self.__jobList = []
+            self.jobList = []
             for p in params:
-                self.__jobList.append( Job( fromDictionary=p ) )
+                self.jobList.append( Job( fromDictionary=p ) )
         else:
             experimentName = params['name']
             script = params['script']
@@ -58,30 +59,50 @@ class Experiment:
             from sklearn.grid_search import ParameterGrid
             parameter = list( ParameterGrid( parameter ) )
 
-            self.__jobList = []
+            self.jobList = []
             for i in range( len( parameter ) ):
                 jobName = experimentName + ( '_%04d' % i )
                 resultFile = resultFileDirectory + '/' + jobName + '.json'
                 logFile = logFileDirectory + '/' + jobName + '.out'
-                self.__jobList.append( Job( jobName=jobName, script=script, resultFile=resultFile, \
+                self.jobList.append( Job( jobName=jobName, script=script, resultFile=resultFile, \
                                             logFile=logFile, parameter=parameter[i] ) )
 
     def runBashJobs( self, jobsPerProcess=1 ):
-        for i in range( 0, len( self.__jobList ), jobsPerProcess ):
+        for i in range( 0, len( self.jobList ), jobsPerProcess ):
             jobNames = []
             jobCmds = ''
-            for j in range( i, min( i + jobsPerProcess, len( self.__jobList ) ) ):
-                jobNames.append( self.__jobList[j].getJobName() )
-                jobCmds += ' '.join( self.__jobList[j].bashCmd( withLogRedirect=True ) ) + ';'
+            for j in range( i, min( i + jobsPerProcess, len( self.jobList ) ) ):
+                jobNames.append( self.jobList[j].getJobName() )
+                jobCmds += ' '.join( self.jobList[j].bashCmd( withLogRedirect=True ) ) + ';'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
             subprocess.Popen( ['bash', '-c', jobCmds], shell=False )
             print 'done'
 
+    def runPBSJobs( self, logDir, jobsPerProcess=1, runNow=False ):
+        jobId = 0
+        for i in range( 0, len( self.jobList ), jobsPerProcess ):
+            jobNames = []
+            jobCmds = ''
+            for j in range( i, min( i + jobsPerProcess, len( self.jobList ) ) ):
+                jobNames.append( self.jobList[j].getJobName() )
+                jobCmds += ' '.join( self.jobList[j].bashCmd( withLogRedirect=True ) ) + ';'
+            jobCmds = '"' + jobCmds + '"'
+            print 'Launching ' + ', '.join( jobNames ) + ' ... ',
+
+            logFile = logDir + ( '/job%04d.out' % jobId )
+            errFile = logDir + ( '/job%04d.err' % jobId )
+            nowBit = 'y' if runNow else 'n'
+
+            subprocess.Popen( ['qsub', '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, jobCmds], shell=False )
+            jobId += 1
+
+            print 'done'
+
     def getNumberOfJobs( self ):
-        return len( self.__jobList )
+        return len( self.jobList )
 
     def toDictionary( self ):
-        return map( lambda j : j.toDictionary(), self.__jobList )
+        return map( lambda j : j.toDictionary(), self.jobList )
 
 def createExperiment( experimentConf, parameterDict, name=None, script=None, resultDir=None, logDir=None ):
     if parameterDict.has_key( 'parameter' ):
@@ -106,7 +127,7 @@ def createExperiment( experimentConf, parameterDict, name=None, script=None, res
 
     print 'Created ' + str( exp.getNumberOfJobs() ) + ' jobs.'
 
-def launchExperiment( experimentConf, numberOfJobs=None ):
+def launchExperiment( experimentConf, numberOfJobs=None, isPBS=False, pbsNow=False, pbsLength='hour' ):
     with open( experimentConf, 'r' ) as fp:
         params = json.load( fp )
         exp = Experiment( fromDictionary=params )
@@ -118,7 +139,11 @@ def launchExperiment( experimentConf, numberOfJobs=None ):
         print 'Launching ' + str( exp.getNumberOfJobs() ) + ' jobs on ' + str( numberOfJobs ) + ' processes.'
         print 'Launching ' + str( jobsPerProcess ) + ' jobs per process.'
 
-        exp.runBashJobs( jobsPerProcess )
+        if not isPBS:
+            exp.runBashJobs( jobsPerProcess )
+        else:
+            logDir = os.path.dirname( os.path.abspath( exp.jobList[0].getLogFile() ) )
+            exp.runPBSJobs( logDir, jobsPerProcess=jobsPerProcess, runNow=pbsNow )
 
         print 'Done'
 
@@ -138,6 +163,10 @@ def main():
 
     parser.add_argument( '-j', '--jobs', type=int, help='Number of jobs that should be submitted.' )
 
+    parser.add_argument( '--pbs', action="store_true", help='Submit jobs as a PBS job.' )
+    parser.add_argument( '--now', action="store_true", help='Schedule PBS job now.' )
+    parser.add_argument( '--length', type=str, default='hour', help='Length of PBS job. Can be either "hour", "day", or "inf"' )
+
     args = parser.parse_args()
 
     experimentFile = args.experiment
@@ -149,7 +178,7 @@ def main():
                               resultDir=args.resultDir, logDir=args.logDir )
     elif args.action == 'launch':
         numberOfJobs = args.jobs
-        launchExperiment( experimentFile, numberOfJobs )
+        launchExperiment( experimentFile, numberOfJobs=numberOfJobs, isPBS=args.pbs, pbsNow=args.now, pbsLength=args.length )
     else:
         raise Exception( 'Unrecognized action command ' + str( args.action ) )
 
