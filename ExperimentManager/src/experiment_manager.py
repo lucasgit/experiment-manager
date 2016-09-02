@@ -23,7 +23,7 @@ class Job:
         self.__parameterDict = params['parameter']
 
     def bashCmd( self, withLogRedirect=False ):
-        cmd = ['/usr/bin/python', self.__script]
+        cmd = ['python_launcher', self.__script]
         for ( flag, value ) in self.__parameterDict.items():
             cmd += [flag, str( value )]
         cmd += ['-r', self.__resultFile]
