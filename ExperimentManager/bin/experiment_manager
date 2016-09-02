@@ -46,6 +46,7 @@ class Experiment:
     def __init__( self, **params ):
         if params.has_key( 'fromDictionary' ):
             params = params['fromDictionary']
+            self.__experimentName = params['name']
             self.jobList = []
             for p in params:
                 self.jobList.append( Job( fromDictionary=p ) )
