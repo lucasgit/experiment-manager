@@ -90,15 +90,15 @@ class Experiment:
             jobCmds = 'bash -c "' + jobCmds[:-1] + '"'
             print 'Launching ' + ', '.join( jobNames ) + ' ... ',
 
-            logFile = logDir + ( '/pbs_job_%s_%04d.out' % self.jobList[0].getJobName(), jobId )
-            errFile = logDir + ( '/pbs_job_%s_%04d.err' % self.jobList[0].getJobName(), jobId )
+            logFile = logDir + ( '/pbs_job_%s_%04d.out' % jobNames[0], jobId )
+            errFile = logDir + ( '/pbs_job_%s_%04d.err' % jobNames[0], jobId )
             nowBit = 'y' if runNow else 'n'
 
-            qsubCmd = ' '.join( ['qsub', '-N', ( '%s_%04d' % self.jobList[0].getJobName(), jobId ), '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
+            qsubCmd = ' '.join( ['qsub', '-N', ( '%s_%04d' % jobNames[0], jobId ), '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
             print '\n\n' + qsubCmd + '\n'
 
 #            subprocess.Popen( ['. ~/.bashrc'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            subprocess.Popen( ['qsub', '-N', ( '%s_%04d' % self.jobList[0].getJobName(), jobId ), '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
+            subprocess.Popen( ['qsub', '-N', ( '%s_%04d' % jobNames[0], jobId ), '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
             jobId += 1
 
             print 'done'
