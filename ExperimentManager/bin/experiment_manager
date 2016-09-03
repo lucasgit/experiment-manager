@@ -79,7 +79,7 @@ class Experiment:
             subprocess.Popen( ['bash', '-c', jobCmds], shell=False )
             print 'done'
 
-    def runPBSJobs( self, logDir, jobsPerProcess=1, runNow=False ):
+    def runPBSJobs( self, logDir, jobsPerProcess=1, runNow=False, length='short' ):
         jobId = 0
         for i in range( 0, len( self.jobList ), jobsPerProcess ):
             jobNames = []
@@ -96,11 +96,11 @@ class Experiment:
             errFile = logDir + ( '/pbs_job_%s.err' % pbsJobCode )
             nowBit = 'y' if runNow else 'n'
 
-            qsubCmd = ' '.join( ['qsub', '-N', pbsJobCode, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
+            qsubCmd = ' '.join( ['qsub', '-N', pbsJobCode, '-l', length, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
             print '\n\n' + qsubCmd + '\n'
 
 #            subprocess.Popen( ['. ~/.bashrc'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            subprocess.Popen( ['qsub', '-N', pbsJobCode, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
+            subprocess.Popen( ['qsub', '-N', pbsJobCode, '-l', length, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
             jobId += 1
 
             print 'done'
@@ -150,7 +150,7 @@ def launchExperiment( experimentConf, numberOfJobs=None, isPBS=False, pbsNow=Fal
             exp.runBashJobs( jobsPerProcess )
         else:
             logDir = os.path.dirname( os.path.abspath( exp.jobList[0].getLogFile() ) )
-            exp.runPBSJobs( logDir, jobsPerProcess=jobsPerProcess, runNow=pbsNow )
+            exp.runPBSJobs( logDir, jobsPerProcess=jobsPerProcess, runNow=pbsNow, length=pbsLength )
 
         print 'Done'
 
