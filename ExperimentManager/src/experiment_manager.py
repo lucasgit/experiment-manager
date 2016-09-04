@@ -79,7 +79,7 @@ class Experiment:
             subprocess.Popen( ['bash', '-c', jobCmds], shell=False )
             print 'done'
 
-    def runPBSJobs( self, logDir, jobsPerProcess=1, runNow=False, length='short' ):
+    def runPBSJobs( self, logDir, jobsPerProcess=1, runNow=False, length='short', memory=None ):
         jobId = 0
         for i in range( 0, len( self.jobList ), jobsPerProcess ):
             jobNames = []
@@ -96,11 +96,16 @@ class Experiment:
             errFile = logDir + ( '/pbs_job_%s.err' % pbsJobCode )
             nowBit = 'y' if runNow else 'n'
 
-            qsubCmd = ' '.join( ['qsub', '-N', pbsJobCode, '-l', length, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds] )
+            if memory is None:
+                cmdAr = ['qsub', '-N', pbsJobCode, '-l', length, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds]
+            else:
+                cmdAr = ['qsub', '-N', pbsJobCode, '-l', length, 'vf=' + memory, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds]
+
+            qsubCmd = ' '.join( cmdAr )
             print '\n\n' + qsubCmd + '\n'
 
 #            subprocess.Popen( ['. ~/.bashrc'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
-            subprocess.Popen( ['qsub', '-N', pbsJobCode, '-l', length, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds], shell=False, cwd='.' )
+            subprocess.Popen( cmdAr, shell=False, cwd='.' )
             jobId += 1
 
             print 'done'
@@ -134,7 +139,7 @@ def createExperiment( experimentConf, parameterDict, name=None, script=None, res
 
     print 'Created ' + str( exp.getNumberOfJobs() ) + ' jobs.'
 
-def launchExperiment( experimentConf, numberOfJobs=None, isPBS=False, pbsNow=False, pbsLength='hour' ):
+def launchExperiment( experimentConf, numberOfJobs=None, isPBS=False, pbsNow=False, pbsLength='hour', memory=None ):
     with open( experimentConf, 'r' ) as fp:
         params = json.load( fp )
         exp = Experiment( fromDictionary=params )
@@ -150,7 +155,7 @@ def launchExperiment( experimentConf, numberOfJobs=None, isPBS=False, pbsNow=Fal
             exp.runBashJobs( jobsPerProcess )
         else:
             logDir = os.path.dirname( os.path.abspath( exp.jobList[0].getLogFile() ) )
-            exp.runPBSJobs( logDir, jobsPerProcess=jobsPerProcess, runNow=pbsNow, length=pbsLength )
+            exp.runPBSJobs( logDir, jobsPerProcess=jobsPerProcess, runNow=pbsNow, length=pbsLength, memory=memory )
 
         print 'Done'
 
@@ -173,6 +178,7 @@ def main():
     parser.add_argument( '--pbs', action="store_true", help='Submit jobs as a PBS job.' )
     parser.add_argument( '--now', action="store_true", help='Schedule PBS job now.' )
     parser.add_argument( '--length', type=str, default='hour', help='Length of PBS job. Can be either "hour", "day", or "inf"' )
+    parser.add_argument( '--memory', type=str, default=None, help='Memory that should be reserved for one job.' )
 
     args = parser.parse_args()
 
@@ -185,7 +191,7 @@ def main():
                               resultDir=args.resultDir, logDir=args.logDir )
     elif args.action == 'launch':
         numberOfJobs = args.jobs
-        launchExperiment( experimentFile, numberOfJobs=numberOfJobs, isPBS=args.pbs, pbsNow=args.now, pbsLength=args.length )
+        launchExperiment( experimentFile, numberOfJobs=numberOfJobs, isPBS=args.pbs, pbsNow=args.now, pbsLength=args.length, memory=args.memory )
     else:
         raise Exception( 'Unrecognized action command ' + str( args.action ) )
 
