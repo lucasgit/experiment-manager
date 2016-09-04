@@ -99,7 +99,7 @@ class Experiment:
             if memory is None:
                 cmdAr = ['qsub', '-N', pbsJobCode, '-l', length, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds]
             else:
-                cmdAr = ['qsub', '-N', pbsJobCode, '-l', length, 'vf=' + memory, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds]
+                cmdAr = ['qsub', '-N', pbsJobCode, '-l', length, '-l vf=' + memory, '-cwd', '-now', nowBit, '-b', 'y', '-o', logFile, '-e', errFile, '-V', jobCmds]
 
             qsubCmd = ' '.join( cmdAr )
             print '\n\n' + qsubCmd + '\n'
